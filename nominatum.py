@@ -1,22 +1,23 @@
 import pandas as pd
 import os
 
-path=os.path.join("file","filename.xlsx")
+dir="Provdie Current working directory"
+os.chdir(dir)
+
+path=os.path.join(os.getcwd(),"file","filename.xlsx")
 
 xls=pd.ExcelFile(path)
 data=pd.read_excel(xls,'Address_checked')
 
-data=data[data['Exact_lat']=='None']
-
-data=data.dropna(subset=['Final_Long'])
+data=data.dropna(subset=['Final_Latitude','Final_Longitude'])
 
 from geopy.geocoders import Nominatim
 geolocator = Nominatim(timeout=None,user_agent="my-application" )
 coun=[]
 for index,rows in data.iterrows():
-    if((rows["Final_Lat"]!="not found")|(rows["Final_Long"]!="not found")):
-        lat=rows['Final_Lat']
-        lon=rows['Final_Long']
+    if((rows["Final_Latitude"]!="not found")|(rows["Final_Longitude"]!="not found")):
+        lat=rows['Final_Latitude']
+        lon=rows['Final_Longitude']
         location = geolocator.reverse((lat,lon),language='en')
         e=location.raw
         country=e['address']['country']
@@ -25,8 +26,12 @@ for index,rows in data.iterrows():
         print("-------------") 
         data.loc[index,'Country']=e['address']['country'] 
 
-new_path=os.path.join("file","filename_with_address.xlsx")
-
+        
+#provide path to save the dataframe in excel or csv format
+if not os.path.exists(os.path.join(os.getcwd(),"file","filename_with_address.xlsx")):
+    new_path=os.path.join(os.getcwd(),"file","filename_with_address.xlsx")
+    os.makedirs(os.path.join(os.getcwd(),"file","filename_with_address.xlsx"))
+    
 with pd.ExcelWriter(new_path) as writer:  
     data.to_excel(writer, sheet_name='Updated')
     writer.save()
