@@ -4,7 +4,6 @@ import os
 path=os.path.join("file","filename.xlsx")
 
 xls=pd.ExcelFile(path)
-
 data=pd.read_excel(xls,'Address_checked')
 
 data=data[data['Exact_lat']=='None']
